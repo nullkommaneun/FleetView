@@ -1,0 +1,374 @@
+/* style.css */
+/* Stile für BeaconBay FleetView */
+
+/* 1. Globale Stile & CSS-Variablen (für einfaches Theming) */
+:root {
+    /* Farbpalette (Dark Mode) */
+    --color-bg: #1a1a1a;        /* Dunkler Hintergrund */
+    --color-surface: #2c2c2c;   /* Kacheln, Header, Modals */
+    --color-text: #f0f0f0;      /* Heller Haupttext */
+    --color-text-muted: #888;   /* Grauer, unauffälliger Text */
+    --color-primary: #007bff;   /* Haupt-Button-Farbe (Blau) */
+    --color-border: #444;       /* Ränder */
+
+    /* Status-Farben (LEDs) */
+    --led-green: #4caf50;
+    --led-yellow: #ffeb3b;
+    --led-red: #f44336;
+    
+    /* Status-Farben (RSSI-Balken) */
+    --rssi-strong: var(--led-green);
+    --rssi-medium: #ffc107; /* Ein etwas dunkleres Gelb als die LED */
+    --rssi-weak: var(--led-red);
+    
+    /* Typografie */
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-family-mono: 'Courier New', Courier, monospace;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    margin: 0;
+    /* Wichtig: Platz für den fixierten Header, damit Inhalte nicht dahinter verschwinden */
+    padding-top: 80px; 
+    /* Platz für die minimierte Konsole */
+    padding-bottom: 50px; 
+}
+
+/* 2. Header & Steuerung */
+header {
+    position: fixed; /* Bleibt immer oben sichtbar */
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box; /* Stellt sicher, dass padding die Breite nicht ändert */
+    z-index: 100; /* Liegt über dem Grid */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+#btn-start-scan {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#btn-start-scan:hover {
+    background-color: #0056b3; /* Dunkleres Blau bei Hover */
+}
+
+/* Spezial-Stil, wenn der Scan aktiv ist */
+#btn-start-scan.scanning {
+    background-color: var(--led-red);
+}
+#btn-start-scan.scanning:hover {
+    background-color: #c0392b; /* Dunkleres Rot */
+}
+
+
+/* 3. Cockpit Grid (Die FTS-Kacheln) */
+#cockpit-grid {
+    display: grid;
+    /* Responsive Grid: 
+       - 'auto-fill': Füllt die Zeile mit so vielen Spalten wie möglich.
+       - 'minmax(280px, 1fr)': Jede Spalte ist mindestens 280px breit,
+         oder breiter (1fr), um den verfügbaren Platz gleichmäßig zu füllen.
+    */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.fts-tile {
+    background-color: var(--color-surface);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+    /* 'Fluid-UI': Sanfte Übergänge für Hover-Effekte */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* Verhindert, dass Kacheln bei Animationen "wackeln" */
+    transform: translateZ(0);
+}
+
+.fts-tile:hover {
+    transform: translateY(-3px); /* Leichter "Lift"-Effekt */
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+.tile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+/* Status-LED (schneller visueller Indikator) */
+.led {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+    flex-shrink: 0; /* Verhindert, dass die LED schrumpft */
+    /* Sanfter Farbwechsel, wenn der Status sich ändert */
+    transition: background-color 0.5s ease;
+}
+.led-green { background-color: var(--led-green); }
+.led-yellow { background-color: var(--led-yellow); }
+.led-red { background-color: var(--led-red); }
+
+.tile-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+    /* Verhindert Umbruch bei langen Namen und zeigt '...' */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tile-body {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.rssi-display {
+    text-align: center;
+    flex-basis: 70px; /* Feste Breite für das RSSI-Display */
+    flex-shrink: 0;
+}
+.rssi-value {
+    font-size: 2rem;
+    font-weight: 300; /* Dünner Font für die Zahl */
+    line-height: 1;
+}
+.rssi-unit {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.rssi-bar-wrapper {
+    width: 100%; /* Füllt den Rest des Platzes */
+    height: 10px;
+    background-color: var(--color-border); /* Hintergrund des Balkens */
+    border-radius: 5px;
+    overflow: hidden; /* Stellt sicher, dass der Balken innen bleibt */
+}
+
+.rssi-bar {
+    height: 100%;
+    width: 0; /* Standardbreite, wird per JS (style.width) gesetzt */
+    border-radius: 5px;
+    /* 'Fluid-UI': Animiert die Balkenbreite und -farbe */
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* RSSI-Balkenfarben */
+.rssi-strong { background-color: var(--rssi-strong); }
+.rssi-medium { background-color: var(--rssi-medium); }
+.rssi-weak { background-color: var(--rssi-weak); }
+
+/* Footer der Kachel (Payload & Zeit) */
+.tile-footer {
+    font-family: var(--font-family-mono); /* Monospace für Payloads */
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    display: flex;
+    justify-content: space-between;
+}
+.tile-payload-preview {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.tile-last-seen {
+    flex-shrink: 0; /* Verhindert Schrumpfen */
+    margin-left: 10px;
+}
+
+/* 4. In-App Konsole (Error Manager) */
+#error-console {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 200px; /* Höhe der maximierten Konsole */
+    background-color: #222; /* Etwas anderer Hintergrund als Kacheln */
+    border-top: 1px solid var(--color-border);
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
+    z-index: 200; /* Liegt über dem Grid, aber unter dem Modal */
+    display: flex;
+    flex-direction: column;
+    transition: height 0.3s ease; /* Animiert das Minimieren/Maximieren */
+    box-sizing: border-box;
+}
+
+#error-console.console-hidden {
+    height: 40px; /* Höhe des Headers (minimiert) */
+    overflow: hidden; /* Versteckt den 'console-body' */
+}
+
+#console-header {
+    background-color: #333;
+    padding: 0.5rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer; /* Zeigt an, dass der ganze Header klickbar ist */
+    flex-shrink: 0; /* Header schrumpft nicht */
+    height: 40px;
+    box-sizing: border-box;
+}
+
+#console-header span {
+    font-weight: bold;
+}
+
+#btn-toggle-console {
+    background: none;
+    border: 1px solid #666;
+    color: var(--color-text);
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+#console-body {
+    flex-grow: 1; /* Füllt den restlichen Platz in der Konsole */
+    overflow-y: auto; /* Scrollbar, wenn Logs überlaufen */
+    padding: 0.5rem 1rem;
+    font-family: var(--font-family-mono);
+    font-size: 0.9rem;
+}
+
+#console-body p {
+    margin: 0 0 0.25rem 0; /* Kompakter Zeilenabstand */
+    word-break: break-all; /* Umbruch bei sehr langen Fehlermeldungen */
+}
+
+/* Log-Level Farben für die UI-Konsole */
+.log-log { color: #eee; }
+.log-info { color: #3498db; } /* Blau */
+.log-warn { color: var(--led-yellow); }
+.log-error { color: var(--led-red); font-weight: bold; }
+
+/* 5. Inspektor-Modal (Payload-Zoom) */
+#inspector-modal {
+    position: fixed;
+    z-index: 300; /* Liegt über allem (auch der Konsole) */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Scrollbar, falls Modal auf kleinem Screen zu hoch ist */
+    background-color: rgba(0,0,0,0.6); /* Verdunkelter Hintergrund */
+    display: flex; /* Zentriert den Inhalt (mit align/justify) */
+    align-items: center;
+    justify-content: center;
+    
+    /* Standardmäßig versteckt (wird von JS umgeschaltet) */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Klasse, die JS hinzufügt, um das Modal anzuzeigen */
+#inspector-modal:not(.modal-hidden) {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background-color: var(--color-surface);
+    margin: auto;
+    padding: 20px;
+    border: 1px solid var(--color-border);
+    width: 90%;
+    max-width: 600px; /* Maximale Breite für Desktop */
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.modal-close {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.inspector-group {
+    margin-bottom: 1rem;
+}
+.inspector-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+/* Stil für <pre> (Rohdaten) und <input> (Nickname) */
+.inspector-group pre, .inspector-group input[type="text"] {
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-family: var(--font-family-mono);
+    color: var(--color-text);
+    width: 100%;
+    box-sizing: border-box; /* Wichtig für <input> */
+    font-size: 0.9rem;
+}
+
+/* Spezifische Stile für <pre> (Payloads, etc.) */
+.inspector-group pre {
+    white-space: pre-wrap; /* Lässt lange Payloads umbrechen */
+    word-wrap: break-word; /* Bricht Wörter/Hex-Strings um */
+    min-height: 30px;
+}
+
+/* Spezifische Stile für <input> */
+.inspector-group input[type="text"] {
+    font-family: var(--font-family); /* Nickname muss nicht mono sein */
+    font-size: 1rem;
+}
+
+#btn-save-name {
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    background-color: var(--led-green);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#btn-save-name:hover {
+    background-color: #3e8e41; /* Dunkleres Grün */
+}
