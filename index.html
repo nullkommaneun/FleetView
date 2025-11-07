@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeaconBay FleetView</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <script type="module" src="app.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1 id="app-title">Lädt...</h1>
+        <button id="btn-start-scan">Scan starten</button>
+    </header>
+
+    <main id="cockpit-grid"></main>
+
+    <div id="error-console" class="console-hidden">
+        <div id="console-header">
+            <span>App-Konsole & Logs</span>
+            <button id="btn-toggle-console">Minimieren</button>
+        </div>
+        <div id="console-body">
+            </div>
+    </div>
+
+    <div id="inspector-modal" class="modal-hidden">
+        <div class="modal-content">
+            <button id="btn-close-modal" class="modal-close">&times;</button>
+            <h2>Geräte-Inspektor</h2>
+            
+            <div class="inspector-group">
+                <label>Nickname:</label>
+                <input type="text" id="inspector-name" placeholder="[z.B. FTS an Ladestation 1]">
+            </div>
+            <div classs="inspector-group">
+                <label>Geräte-ID (MAC-Adresse):</label>
+                <pre id="inspector-id"></pre>
+            </div>
+            <div class="inspector-group">
+                <label>Signal-Verlauf (letzte 20 RSSI-Werte):</label>
+                <pre id="inspector-rssi-history"></pre>
+            </div>
+            <div class="inspector-group">
+                <label>Letzter Payload (Rohdaten):</label>
+                <pre id="inspector-payload"></pre>
+            </div>
+            
+            <button id="btn-save-name">Namen speichern</button>
+        </div>
+    </div>
+
+</body>
+</html>
